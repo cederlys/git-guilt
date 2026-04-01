@@ -5,6 +5,9 @@ fi
 
 set -e
 
+ORIG_PWD=$PWD
+typeset -r ORIG_PWD
+
 export PATH=$PWD/..:$PATH
 
 # "guilt help" should use man-pages from the source directory.
@@ -117,7 +120,7 @@ function replace_path
 	# * 2.35.0 and newer:
 	#   branch 'feature' set up to track 'origin/feature'.
 
-	sed -e "s,$PWD,PATH,g" \
+	sed -e "s,$ORIG_PWD,PATH,g" \
 	    -e "s,$REG_DIR/\.\./,,g" \
 	    -e "s,\.\.\. initial, initial,g" \
 	    -e "s,^Already on\( branch\)\? [\"']\([^\"']*\)[\"']$,Already on \"\2\",g" \
