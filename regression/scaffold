@@ -3,7 +3,7 @@ if [ -z "$REG_DIR" ]; then
 	exit 2
 fi
 
-set -e
+set -e -x
 
 export PATH=$PWD/..:$PATH
 
