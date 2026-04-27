@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+echo hello, this is run-tests starting
 
 export REG_DIR="$PWD"
 export PATH="$PWD/bin:$PATH"
