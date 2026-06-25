@@ -36,6 +36,18 @@ fi
 
 function replace_path
 {
+	# When you do "git checkout feature", where "feature" is a
+	# branch that exists on the remote named "origin" but not
+	# (yet) locally, git prints a message.
+	# Git 2.35.0 and newer prints:
+	#     branch 'feature' set up to track 'origin/feature'.
+	# Git 2.15.0 - 2.34.8 instead printed:
+	#     Branch 'feature' set up to track remote branch 'feature' from 'origin'.
+	# Before Git 2.15.0 (at least back to 1.8.5 and possibly even
+	# before that) instead printed:
+	#     Branch feature set up to track remote branch feature from origin.
+	# We transform the two older message formats to the new format.
+
 	sed -e "s,$PWD,PATH,g" \
 	    -e "s,$REG_DIR/\.\./,,g" \
 	    -e "s,^Usage: guilt-,Usage: guilt ,g" \
@@ -43,7 +55,8 @@ function replace_path
 	    -e "s,^Already on\( branch\)\? [\"']\([^\"']*\)[\"']$,Already on \"\2\",g" \
 	    -e "s,^Switched to branch [\"']\([^\"']*\)[\"'],Switched to branch \"\1\",g" \
 	    -e "\\,^Deleted branch guilt/.* (was .*).$,d" \
-	    -e "s,This operation must be run in a work tree,this operation must be run in a work tree,"
+	    -e "s,This operation must be run in a work tree,this operation must be run in a work tree," \
+	    -e "s,Branch '\?\([^']*\)'\? set up to track remote branch '\?\([^']*\)'\? from '\?\([^']*\)'\?\.,branch '\1' set up to track '\3/\2'.,"
 }
 
 # Newer dd does
