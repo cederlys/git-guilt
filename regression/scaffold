@@ -125,6 +125,7 @@ function setup_git_repo
 	git config log.decorate no
 	git config guilt.diffstat false
 	git config guilt.reusebranch false
+	git config guilt.submodule basic
 }
 
 function setup_guilt_repo
