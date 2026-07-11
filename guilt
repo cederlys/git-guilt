@@ -647,22 +647,24 @@ pop_many_patches()
 			msg="popping $2 patches: now at `tail -1 \"$applied.tmp\"`"
 		fi
 
-		# FIXME: We should use "-z" so that we can handle
-		# unusual characters in filenames.  Handling the
-		# quoting versions documented in core.quotePath (see
-		# git-config(1)) is too errorprone and too hard to do
-		# from a shellscript.  Then again, handling the "-z"
-		# output format is also too hard to do from a
-		# shellscript.
-		#
-		# For now, just handle easy filenames.  Once this
-		# works, we can write a small portable C program to
-		# handle this...
-		git diff --no-ext-diff -r --raw --abbrev=40 --ignore-submodules=none "$1" HEAD > "$DIFF_TMP"
-		sed -n 's/:000000 160000 0000000000000000000000000000000000000000 [0-9a-f]* A	//p' "$DIFF_TMP" | while read fn
-		do
-			git submodule deinit $fn
-		done
+		if [ $submodule = basic ]; then
+			# FIXME: We should use "-z" so that we can handle
+			# unusual characters in filenames.  Handling the
+			# quoting versions documented in core.quotePath (see
+			# git-config(1)) is too errorprone and too hard to do
+			# from a shellscript.  Then again, handling the "-z"
+			# output format is also too hard to do from a
+			# shellscript.
+			#
+			# For now, just handle easy filenames.  Once this
+			# works, we can write a small portable C program to
+			# handle this...
+			git diff --no-ext-diff -r --raw --abbrev=40 --ignore-submodules=none "$1" HEAD > "$DIFF_TMP"
+			sed -n 's/:000000 160000 0000000000000000000000000000000000000000 [0-9a-f]* A	//p' "$DIFF_TMP" | while read fn
+			do
+				git submodule deinit $fn
+			done
+		fi
 
 		GIT_REFLOG_ACTION="$GIT_REFLOG_ACTION: $msg" git reset --hard "$1" > /dev/null
 
@@ -673,10 +675,12 @@ pop_many_patches()
 			git update-ref -d refs/heads/$GUILT_PREFIX$branch
 		fi
 
-		sed -n 's/:160000 160000 [0-9a-f]* [0-9a-f]* M[0-9]*	//p' "$DIFF_TMP" | while read fn
-		do
-			git submodule update $fn
-		done
+		if [ $submodule = basic ]; then
+			sed -n 's/:160000 160000 [0-9a-f]* [0-9a-f]* M[0-9]*	//p' "$DIFF_TMP" | while read fn
+			do
+				git submodule update $fn
+			done
+		fi
 	)
 }
 
@@ -838,7 +842,9 @@ push_patch()
 
 		assert_head_check
 		cd_to_toplevel_cached
-		before=`git rev-parse HEAD`
+		if [ $submodule = basic ]; then
+			before=`git rev-parse HEAD`
+		fi
 
 		# apply the patch if and only if there is something to apply
 		if grep -q -e "^diff " -e "^--- " "$p"; then
@@ -861,20 +867,22 @@ push_patch()
 		GIT_REFLOG_ACTION="$GIT_REFLOG_ACTION: $pname" \
 			commit "$pname" HEAD $add_files
 
-		git diff --no-ext-diff -r --raw --abbrev=40 --ignore-submodules=none $before HEAD > "$DIFF_TMP"
-		sed -n 's/:000000 160000 0000000000000000000000000000000000000000 [0-9a-f]* A	//p' "$DIFF_TMP" | while read fn
-		do
-			git submodule update --init "$fn"
-		done
-
-		extract_submodule "$p" > "$DIFF_TMP"
 		need_refresh=false
-		while read old new file
-		do
-			(cd $file && git checkout $new)
-			git add $file
-			need_refresh=true
-		done < "$DIFF_TMP"
+		if [ $submodule = basic ]; then
+			git diff --no-ext-diff -r --raw --abbrev=40 --ignore-submodules=none $before HEAD > "$DIFF_TMP"
+			sed -n 's/:000000 160000 0000000000000000000000000000000000000000 [0-9a-f]* A	//p' "$DIFF_TMP" | while read fn
+			do
+				git submodule update --init "$fn"
+			done
+
+			extract_submodule "$p" > "$DIFF_TMP"
+			while read old new file
+			do
+				(cd $file && git checkout $new)
+				git add $file
+				need_refresh=true
+			done < "$DIFF_TMP"
+		fi
 
 		echo "$pname" >> "$applied"
 
@@ -906,8 +914,10 @@ must_commit_first()
 	git update-index --refresh --unmerged -q > /dev/null
 	[ `git diff-files --no-ext-diff | wc -l` -eq 0 ] || return $?
 	[ `git diff-index --no-ext-diff HEAD | wc -l` -eq 0 ] || return $?
-	[ `git submodule foreach --quiet --recursive git status --porcelain | wc -l` -eq 0 ]
-	return $?
+	if [ $submodule = basic ]; then
+		[ `git submodule foreach --quiet --recursive git status --porcelain | wc -l` -eq 0 ] || return $?
+	fi
+	return 0
 }
 
 # usage: fold_patch patchname
@@ -1099,6 +1109,9 @@ DIFFSTAT_DEFAULT="false"
 # default guilt.reusebranch value: true or false
 REUSE_BRANCH_DEFAULT="false"
 
+# default guilt.submodule: "disabled" or "basic"
+SUBMODULE_DEFAULT=basic
+
 # Prefix for guilt branches.
 GUILT_PREFIX=guilt/
 
@@ -1130,6 +1143,24 @@ diffstat=`git config --bool guilt.diffstat`
 # reuse Git branch?
 reuse_branch=`git config --bool guilt.reusebranch`
 [ -z "$reuse_branch" ] && reuse_branch=$REUSE_BRANCH_DEFAULT
+
+# support submodules?
+submodule=`git config guilt.submodule`
+[ -z "$submodule" ] && submodule=$SUBMODULE_DEFAULT
+
+case $submodule in
+	basic)
+		# Add basic support for submodules.
+		;;
+	disabled)
+		# Don't attempt to handle submodules.
+		;;
+	*)
+		echo 'Warning: unsupported value for guilt.submodule, treated as "basic"' >&2
+		submodule=basic
+		;;
+esac
+
 
 #
 # The following gets run every time this file is source'd
