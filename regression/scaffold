@@ -36,13 +36,63 @@ fi
 
 function replace_path
 {
+	# The original purpose of this function was to replace the
+	# current working directory with a constant string, so that
+	# the output would be the same no matter which directory the
+	# tests run in.
+	#
+	# It is now also responsible for normalizing the output of git
+	# (which occasionally improves in newer versions) so that
+	# tests can succeed even when using an older version of git.
+	#
+	# The rest of this comment documents the normalizations.
+	# Unless specifically noted, we normalize the output so that
+	# it matches the newest supported version of git.
+	#
+	# usage
+	# =====
+	#
+	# git 1.6 and newer likes to replace the first '-' in $0 with
+	# a space.
+	#
+	# "git checkout feature"
+	# ======================
+	#
+	# When you do "git checkout feature", where "feature" is a
+	# branch that exists on the remote named "origin" but not
+	# (yet) locally, git prints a message.
+	#
+	# * Historically:
+	#   Branch feature set up to track remote branch feature from origin.
+	# * 2.15.0 and newer:
+	#   Branch 'feature' set up to track remote branch 'feature' from 'origin'.
+	# * 2.35.0 and newer:
+	#   branch 'feature' set up to track 'origin/feature'.
+	#
+	# "git reset --hard" dots
+	# =======================
+	#
+	# When you do "git reset --hard committish" git prints a
+	# message about where you end up.
+	#
+	# * Historically: no such message was printed.
+	# * 1.5.0 and newer (see 95f2fb7d9f84 in the git repo):
+	#   HEAD is now at deadbeef subject line
+	# * 1.5.4 (see 0e5a7faa3a90 in the git repo):
+	#   HEAD is now at deadbeef... subject line
+	# * 1.5.5 and newer (see 2efb3b061709 in the git repo):
+	#   HEAD is now at deadbeef subject line
+	#
+	# We accommodate git 1.5.4 by removing the three dots when
+	# resetting to the commit named "initial".
 	sed -e "s,$PWD,PATH,g" \
 	    -e "s,$REG_DIR/\.\./,,g" \
 	    -e "s,\.\.\. initial, initial,g" \
 	    -e "s,^Already on\( branch\)\? [\"']\([^\"']*\)[\"']$,Already on \"\2\",g" \
 	    -e "s,^Switched to branch [\"']\([^\"']*\)[\"'],Switched to branch \"\1\",g" \
 	    -e "\\,^Deleted branch guilt/.* (was .*).$,d" \
-	    -e "s,This operation must be run in a work tree,this operation must be run in a work tree,"
+	    -e "s,This operation must be run in a work tree,this operation must be run in a work tree," \
+	    -e "s,Branch '\?\([^']*\)'\? set up to track remote branch '\?\([^']*\)'\? from '\?\([^']*\)'\?\.,branch '\1' set up to track '\3/\2'.,"
 }
 
 # Newer dd does
