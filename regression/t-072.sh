@@ -251,3 +251,52 @@ cmd guilt push
 (cd sub && check_readme abc jkl)
 cmd cat def.txt
 shouldfail cat def
+
+# Add a file that vaguely looks like a submodule update.
+cmd guilt new meta-setup
+cat > confusing.txt << EOF
+index x 160000
+--- a/sub
++++ b/sub
+@@
+Subproject commit 6ddad0339a3e2aa34a251334d0479221f58ff001
+Subproject commit 6ddad0339a3e2aa34a251334d0479221f58ff001
+EOF
+cmd git add confusing.txt
+cmd guilt ref
+cmd guilt pop
+fixup_time_info meta-setup
+cmd guilt push
+cmd guilt new meta-test
+
+# Modify the file that vaguely looks like a submodule update in a way
+# that tricks the original extract_submodule awk script into believing
+# it actually is looking at a submodule update.
+cat > confusing.txt << EOF
+index x 160000
+++
+--- a/sub
+++
++++ b/sub
+@@
+Subproject commit 8fd146eb11cd2f931626fc70ee9e326a30dc5280
+Subproject commit 8fd146eb11cd2f931626fc70ee9e326a30dc5280
+EOF
+(cd sub && cmd git checkout trunk)
+(cd sub && check_readme abc def ghi)
+cmd guilt ref
+(cd sub && check_readme abc def ghi)
+cmd guilt pop
+(cd sub && check_readme abc jkl)
+fixup_time_info meta-test
+cmd guilt push
+(cd sub && check_readme abc def ghi)
+cmd guilt pop
+(cd sub && check_readme abc jkl)
+cmd guilt pop
+(cd sub && check_readme abc jkl)
+cmd guilt push
+(cd sub && check_readme abc jkl)
+cmd guilt push
+(cd sub && check_readme abc def ghi)
+cmd list_files
