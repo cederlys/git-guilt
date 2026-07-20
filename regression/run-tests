@@ -61,18 +61,25 @@ function run_test
 
 	# run the test
 	cd "$REPODIR" > /dev/null
-	if "$REG_DIR/t-$1.sh" 2>&1 > "$LOGFILE"; then
-		ERR=false
-	else
-		ERR=true
-	fi
+	set +e
+	"$REG_DIR/t-$1.sh" 2>&1 > "$LOGFILE"
+	rv=$?
+	set -e
 
 	cd - > /dev/null
 
-	$ERR && test_failed
-	diff -u "t-$1.out" "$LOGFILE" || test_failed
-
-	echo "done."
+	case $rv in
+		0)
+			diff -u "t-$1.out" "$LOGFILE" || test_failed
+			echo "done."
+			;;
+		77)
+			echo "skipped."
+			;;
+		*)
+			test_failed
+			;;
+	esac
 
 	rm -rf "$REPODIR" "$LOGFILE"
 }
