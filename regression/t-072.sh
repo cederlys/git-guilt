@@ -37,24 +37,9 @@ mv ../.git .
 # repository for the submodule.  This needs to have a fixed name so
 # that the .gitmodules file always is identical.  We use paths with
 # spaces to ensure we support that.
-#
-# Using a fixed path in /tmp is a security risk, but unfortunately
-# there is no better location we can use.  Don't run the guilt
-# testsuite on machines you share with users you don't trust.
 UPSTREAM_SUBREPO_BASE="../guilt test"
 UPSTREAM_SUBREPO="$UPSTREAM_SUBREPO_BASE/test sub.git"
 mkdir -p "$UPSTREAM_SUBREPO_BASE"
-
-# Lock the upstream submodule repo, if dotlockfile is available.
-# Otherwise, just continue and hope for the best.
-if type dotlockfile >/dev/null 2>&1
-then
-	dotlockfile -r -1 -i 2 -p "$UPSTREAM_SUBREPO_BASE.lock"
-	trap "dotlockfile -u '$UPSTREAM_SUBREPO_BASE.lock'" 0
-fi
-
-# Start with a clean slate.
-rm -rf "$UPSTREAM_SUBREPO_BASE"
 
 # Populate the upstream git submodule repo.
 # (Since the submodule support only works with Git 2.31 and newer, we
