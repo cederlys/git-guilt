@@ -1161,6 +1161,18 @@ case $submodule in
 		;;
 esac
 
+if [ $submodule = basic ]; then
+	GIT_VERSION=`git --version | awk '{ print $3 }'`
+	GIT_MAJOR=`echo $GIT_VERSION | awk -F. '{ print $1 }'`
+	GIT_MINOR=`echo $GIT_VERSION | awk -F. '{ print $2 }'`
+	if [ $GIT_MAJOR -lt 2 ] || { [ $GIT_MAJOR -eq 2 ] && [ $GIT_MINOR -lt 31 ]; }
+	then
+		echo The submodule support of guilt requires git version 2.31.0 or newer. >&2
+		echo You are using git version $GIT_VERSION. >&2
+		echo 'Please either upgrade git or run "git config guilt.submodule disabled"' >&2
+		exit 1
+	fi
+fi
 
 #
 # The following gets run every time this file is source'd
