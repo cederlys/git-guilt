@@ -16,6 +16,17 @@ function check_readme
 	cmd test "`echo $content`" = "$*" || exit $?
 }
 
+# Git version 2.31.0 is the first version with good enough submodule
+# support for this testsuite.
+VERSION=`git --version | awk '{ print $3 }'`
+MAJOR=`echo $VERSION | awk -F. '{ print $1 }'`
+MINOR=`echo $VERSION | awk -F. '{ print $2 }'`
+if [ $MAJOR -lt 2 ] || { [ $MAJOR -eq 2 ] && [ $MINOR -lt 31 ]; }
+then
+	echo Skipping test. Your git version is too old.
+	exit 77
+fi
+
 
 # The "git submodule add" command needs an upstream for the repository
 # that is going to be added as a submodule.  So in order to be able to
@@ -43,6 +54,8 @@ fi
 rm -rf "$UPSTREAM_SUBREPO_BASE"
 
 # Populate the upstream git submodule repo.
+# (Since the submodule support only works with Git 2.31 and newer, we
+# can safely use the -b option.)
 cmd git init --bare -b trunk "$UPSTREAM_SUBREPO"
 OLD=`pwd`
 cd "$UPSTREAM_SUBREPO_BASE"
