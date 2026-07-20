@@ -414,3 +414,87 @@ line 9
 line 10
 % cat def
 cat: def: No such file or directory
+% guilt new meta-setup
+% git add confusing.txt
+% guilt ref
+Patch meta-setup refreshed
+% guilt pop
+Now at rename+edit.
+% guilt push
+Applying patch..meta-setup
+Patch applied.
+% guilt new meta-test
+% git checkout trunk
+Previous HEAD position was 8fd146e Featurize README
+Switched to branch "trunk"
+Your branch is up to date with 'origin/trunk'.
+% test abc def ghi = abc def ghi
+% guilt ref
+Patch meta-test refreshed
+% test abc def ghi = abc def ghi
+% guilt pop
+Submodule path 'sub': checked out '8fd146eb11cd2f931626fc70ee9e326a30dc5288'
+Now at meta-setup.
+% test abc jkl = abc jkl
+% guilt push
+Applying patch..meta-test
+Previous HEAD position was 8fd146e Featurize README
+HEAD is now at 6ddad03 Refine README
+[guilt/master 5a68df1] patch meta-test
+ Author: Author Name <author@email>
+ Date: Mon Jan 1 00:00:00 2007 +0000
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+Patch applied.
+% test abc def ghi = abc def ghi
+% guilt pop
+Submodule path 'sub': checked out '8fd146eb11cd2f931626fc70ee9e326a30dc5288'
+Now at meta-setup.
+% test abc jkl = abc jkl
+% guilt pop
+Now at rename+edit.
+% test abc jkl = abc jkl
+% guilt push
+Applying patch..meta-setup
+Patch applied.
+% test abc jkl = abc jkl
+% guilt push
+Applying patch..meta-test
+Previous HEAD position was 8fd146e Featurize README
+HEAD is now at 6ddad03 Refine README
+[guilt/master 5a68df1] patch meta-test
+ Author: Author Name <author@email>
+ Date: Mon Jan 1 00:00:00 2007 +0000
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+Patch applied.
+% test abc def ghi = abc def ghi
+% list_files
+d .git/patches
+d .git/patches/master
+f 0fab28537dd608403258b1b7a7a03e432386687d  .git/patches/master/rename+edit
+f 12cb85bad14b01b90365a775dbe600b07a2f0c36  .git/patches/master/meta-setup
+f 1902410ae07500a95f14194e77c3ab3fba92c4d8  .git/patches/master/meta-test
+f 47983ec5d6a525558c6c7ab031dfa14d7d039c2e  .git/patches/master/add-submodule
+f 61e787499dc82686e0574a46a1bf703cadd00767  .git/patches/master/extenddef
+f 98bf8b29e2c5ae1049cca9edcbc25d69e7acb4a3  .git/patches/master/update-sub
+f a4bcea8116a3ed6d5cd588051c2028e54443000d  .git/patches/master/local-changes
+f ad194509bf76d37b313bff5b7f7004b1e895000c  .git/patches/master/binary
+f da39a3ee5e6b4b0d3255bfef95601890afd80709  .git/patches/master/add-submodule~
+f da39a3ee5e6b4b0d3255bfef95601890afd80709  .git/patches/master/binary~
+f da39a3ee5e6b4b0d3255bfef95601890afd80709  .git/patches/master/extenddef~
+f da39a3ee5e6b4b0d3255bfef95601890afd80709  .git/patches/master/local-changes~
+f da39a3ee5e6b4b0d3255bfef95601890afd80709  .git/patches/master/meta-setup~
+f da39a3ee5e6b4b0d3255bfef95601890afd80709  .git/patches/master/meta-test~
+f da39a3ee5e6b4b0d3255bfef95601890afd80709  .git/patches/master/rename+edit~
+f da39a3ee5e6b4b0d3255bfef95601890afd80709  .git/patches/master/update-sub~
+f fa78684c82dac296f661f0878318a032add7ffc0  .git/patches/master/series
+f fa78684c82dac296f661f0878318a032add7ffc0  .git/patches/master/status
+f fe34b55263c76b2b4f374f1aa293105cc42a9002  .git/patches/master/use-feature
+r 11977969af83a4c8d824c4dcf7f25d12f05ff2c7  .git/refs/patches/master/rename+edit
+r 22853c81644b0c41d6fb5f372e4186281cf9ecea  .git/refs/patches/master/update-sub
+r 253b8cdb6abfe868c456fe20542859ba1c68a4df  .git/refs/patches/master/extenddef
+r 5a68df140dcc90270ccec09b6fbda3ba83741db2  .git/refs/patches/master/meta-test
+r 8b121046333c367b81bd566d4b3536ce7cb93bb3  .git/refs/patches/master/add-submodule
+r c53489166327a7bd56da0ccc7ef60aff36352a78  .git/refs/patches/master/meta-setup
+r cf77d1bb3c45e0741a298debd4ea9f8289954963  .git/refs/patches/master/binary
+r fad0854bd2915f4b66cab5c08f05ad1ffa40665d  .git/refs/patches/master/use-feature
+r fbae6ca931b4c88f12fb694fbecace54c210ec95  .git/refs/patches/master/local-changes
