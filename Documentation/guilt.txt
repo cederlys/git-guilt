@@ -56,6 +56,28 @@ All commands must be called without a dash. e.g. 'guilt add'
 
 include::cmds.txt[]
 
+SUBMODULE SUPPORT
+-----------------
+
+Guilt contains experimental basic support for working with submodules.
+If you add or remove a submodule, or change which commit of a
+submodule is checked out, +guilt refresh+ will note that in the
+current patch file.  +guilt push+ and +guilt pop+ will update
+submodules as appropriate when a patch is applied or removed.
+
+You can disable the submodule support by running:
+
+    $ git config guilt.submodule disabled
+
+It can be re-enabled by running:
+
+    $ git config guilt.submodule basic
+
+As the guilt community gains more experience with using guilt with
+submodules, it is possible that other modes of working with submodules
+may be added.  If so, they will likely be enabled by setting
++guilt.submodule+ to some other value.
+
 Author
 ------
 Written by Josef "Jeff" Sipek <jeffpc@josefsipek.net>
