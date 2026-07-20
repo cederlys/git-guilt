@@ -82,6 +82,7 @@ cmd git push origin feature
 cd "$OLD"
 
 cmd setup_git_repo
+cmd git config guilt.submodule basic
 
 cmd guilt init
 cmd list_files

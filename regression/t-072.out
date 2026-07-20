@@ -37,6 +37,7 @@ Switched to a new branch 'feature'
 To /tmp/guilt test/test sub.git
  * [new branch]      feature -> feature
 % setup_git_repo
+% git config guilt.submodule basic
 % guilt init
 % list_files
 d .git/patches
