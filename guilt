@@ -818,7 +818,7 @@ sm {
 	fn = "";
 	sm = 0
 }
-$1 == "index" && $3 == "160000" {sm=1}' < "$1"
+substr($0, 1, 6) == "index " && $3 == "160000" {sm=1}' < "$1"
 }
 
 # usage: push_patch patchname [bail_action]
