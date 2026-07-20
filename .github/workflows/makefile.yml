@@ -10,9 +10,11 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/cederlys/ubuntu-24.04-asciidoc:install-test-4
 
     steps:
     - uses: actions/checkout@v6
 
     - name: Run check
-      run: make test
+      run: make -j4 test
