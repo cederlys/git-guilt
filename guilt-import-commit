@@ -48,8 +48,7 @@ for rev in `git rev-list $rhash`; do
 
 	# Try to convert the first line of the commit message to a
 	# valid patch name.
-	if [ -n "$namebase" ]
-	then
+	if [ -n "$namebase" ]; then
 		fname="$namebase"
 	else
 		fname=`printf %s "$s" |
