@@ -659,7 +659,7 @@ pop_many_patches()
 			# For now, just handle easy filenames.  Once this
 			# works, we can write a small portable C program to
 			# handle this...
-			git diff --no-ext-diff -r --raw --abbrev=40 --ignore-submodules=none "$1" HEAD > "$DIFF_TMP"
+			git diff --no-ext-diff --raw --abbrev=40 --ignore-submodules=none "$1" HEAD > "$DIFF_TMP"
 			sed -n 's/:000000 160000 0000000000000000000000000000000000000000 [0-9a-f]* A	//p' "$DIFF_TMP" | while read fn
 			do
 				git submodule deinit $fn
@@ -869,7 +869,7 @@ push_patch()
 
 		need_refresh=false
 		if [ $submodule = basic ]; then
-			git diff --no-ext-diff -r --raw --abbrev=40 --ignore-submodules=none $before HEAD > "$DIFF_TMP"
+			git diff --no-ext-diff --raw --abbrev=40 --ignore-submodules=none $before HEAD > "$DIFF_TMP"
 			sed -n 's/:000000 160000 0000000000000000000000000000000000000000 [0-9a-f]* A	//p' "$DIFF_TMP" | while read fn
 			do
 				git submodule update --init "$fn"
